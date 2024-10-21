@@ -1,6 +1,6 @@
-import { Text, SafeAreaView, StyleSheet, View, TextInput, Image,TouchableOpacity } from 'react-native';
+import { Text, SafeAreaView, StyleSheet, View, TextInput, Image,TouchableOpacity, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 const Stack=createNativeStackNavigator();
@@ -32,6 +32,32 @@ const HomeScreen=({navigation})=>{
       </SafeAreaView>
   );
 }
+const Item =({title})=>(
+  <View style={styles.item}>
+    <Text style={styles.titleItem}>
+      {title}
+    </Text>
+    <View style={{
+      flexDirection:'row'
+    }}>
+      <TouchableOpacity
+      style={{marginRight:10}}>
+        <Icon 
+          name='pencil'
+          size={20}
+          color='#00BDD6'
+        />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Icon 
+          name='times'
+          size={20}
+          color='#00BDD6'
+        />
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 const ListScreen =({navigation, route})=>{
   const userName = route.params?.userName || 'Guest'; 
   const [data, setData] = useState([]);
@@ -51,6 +77,17 @@ const ListScreen =({navigation, route})=>{
     } finally{
       setLoading(false);
     }
+  }
+  useEffect(()=>{
+    refreshData();
+  },[]);
+  if (loading){
+    return <Text>
+    ...isLoading
+    </Text>
+  }
+  if (error) {
+    return <Text>Error: {error}</Text>;
   }
   return (
     <SafeAreaView style={styles.container}>
@@ -79,12 +116,23 @@ const ListScreen =({navigation, route})=>{
         style={styles.searchButton}
         />
       </View>
+      
+      <SafeAreaView style={styles.listItem}>
+        <FlatList
+          data={data}
+          renderItem={({item})=>(
+            <Item
+              title={item.title}
+            />
+          )}
+          keyExtractor={(item)=>item.id.toString()}
+          contentContainerStyle={{paddingBottom:80}}
+          
+        />
+      </SafeAreaView>
+      
+      
 
-      <View style={styles.listItem}>
-        <Text>
-        List
-        </Text>
-      </View>
       <TouchableOpacity style={styles.addButton}>
         <Text style={styles.addButtonText}>
           +
@@ -167,11 +215,12 @@ const styles = StyleSheet.create({
     color:'white',
   },
   headerPage2:{
-    flex:1,
+    height:'10%',
+    marginBottom:20,
     flexDirection:'row',
     justifyContent:'space-between',
     alignItems:'center',
-    paddingRight:20
+    paddingRight:20,
   },
   infoUser: {
     flex:1,
@@ -191,23 +240,35 @@ const styles = StyleSheet.create({
     fontWeight:'bold'
   },
   searchButtonWrap:{
-    flex:1,
     justifyContent:'center',
-    alignItems:'center'
+    alignItems:'center',
+    
   },
   searchButton:{
     borderWidth:1,
-    height:30,
-    width:'80%',
+    height:40,
+    width:'90%',
     borderRadius:5,
-    paddingLeft:20
+    paddingLeft:20,
+    borderColor:'#E0E0E0'
   },
   listItem:{
     flex:1,
-    justifyContent:'center',
+    marginTop:20
+  },
+  item:{
+    flexDirection:'row',
+    justifyContent:'space-between',
     alignItems:'center',
-    height:'100%',
-    backgroundColor:'red'
+    borderWidth:1,
+    borderRadius:5,
+    borderColor:'#E0E0E0',
+    padding:15,
+    marginBottom:10
+  },
+  titleItem:{
+    fontSize:20,
+    color:'#333'
   },
   addButton:{
     left:'45%',
