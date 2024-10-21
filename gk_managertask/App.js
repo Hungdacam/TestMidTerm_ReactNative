@@ -1,26 +1,55 @@
 import { Text, SafeAreaView, StyleSheet, View, TextInput, Image,TouchableOpacity } from 'react-native';
-
-
-export default function App() {
+import {useState} from 'react'
+import {NavigationContainer} from '@react-navigation/native'
+import {createNativeStackNavigator} from '@react-navigation/native-stack'
+const Stack=createNativeStackNavigator();
+const HomeScreen=({navigation})=>{
+  const [name, setName]=useState('');
+  const handlerGetStarted =()=>{
+    navigation.navigate('List',{userName: name})
+  }
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.image}>
-        <Image source={require('./Image95.png')}/>
-      </View>
-      <View style={styles.contentPage1}>
-        <Text style={styles.titleText}>MANAGE YOUR <br/> TASK</Text>
-        <TextInput style={styles.inputName}
-        placeholder='Enter your name'
+        <View style={styles.image}>
+          <Image source={require('./Image95.png')}/>
+        </View>
+        <View style={styles.contentPage1}>
+          <Text style={styles.titleText}>MANAGE YOUR <br/> TASK</Text>
+          <TextInput style={styles.inputName}
+          placeholder='Enter your name'
+          value={name}
+          onChangeText={setName}
+          />
+        </View>
+        <View style={styles.buttonWrap}>
+          <TouchableOpacity style={styles.buttonStarted} onPress={handlerGetStarted}>
+            <Text style={styles.buttonText}>
+              GET STARTED ->
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+  );
+}
+const ListScreen =({navigation, route})=>{
+  return <Text>{route.params.userName}</Text>
+}
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{headerShown:false}}
         />
-      </View>
-      <View style={styles.buttonWrap}>
-        <TouchableOpacity style={styles.buttonStarted}>
-          <Text style={styles.buttonText}>
-            GET STARTED ->
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <Stack.Screen
+          name="List"
+          component={ListScreen}
+          // options={{headerShown:false}}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
