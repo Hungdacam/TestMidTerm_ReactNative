@@ -32,8 +32,12 @@ const HomeScreen=({navigation})=>{
       </SafeAreaView>
   );
 }
-const Item =({title})=>(
-  <View style={styles.item}>
+const Item =({id,title, onSelect, onDelete})=>(
+  <TouchableOpacity
+  style={styles.item}
+  key={id}
+  onPress={()=>onSelect(id)}
+  >
     <Text style={styles.titleItem}>
       {title}
     </Text>
@@ -48,7 +52,10 @@ const Item =({title})=>(
           color='#00BDD6'
         />
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity
+      key={id}
+      onPress={()=> onDelete(id)}
+      >
         <Icon 
           name='times'
           size={20}
@@ -56,13 +63,28 @@ const Item =({title})=>(
         />
       </TouchableOpacity>
     </View>
-  </View>
+  </TouchableOpacity>
 );
+//Tao hook quan li input
+function useInput(initialValue){
+  const [value, setValue]=useState(initialValue);
+  const onChangeText=(newValue)=>{
+    setValue(newValue);
+  }
+  return {
+    value, 
+    onChangeText,
+    setValue
+  }
+}
 const ListScreen =({navigation, route})=>{
   const userName = route.params?.userName || 'Guest'; 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [select, setSelect] = useState(null);
+  const input=useInput("");
+  //render data
   const refreshData = async ()=> {
     setLoading(true);
     try{
@@ -76,6 +98,23 @@ const ListScreen =({navigation, route})=>{
         setError(error.message);
     } finally{
       setLoading(false);
+    }
+  }
+  // Ham xoa
+  const handlerDelete=async(id) =>{
+    try{
+      await fetch(`https://6454008bc18adbbdfead590d.mockapi.io/api/v1/api_todolist/${id}`,{method:'DELETE'})
+      refreshData();
+    } catch (error){
+      setError(error.message);
+    }
+  }
+  // Ham xu li khi nhan vao item
+  const handlerSelectItem = (id)=>{
+    const selectedItem = data.find((item)=>item.id === id);
+    if (selectedItem){
+    setSelect(selectedItem);
+    input.setValue(selectedItem.title);
     }
   }
   useEffect(()=>{
@@ -112,7 +151,9 @@ const ListScreen =({navigation, route})=>{
 
       <View style={styles.searchButtonWrap}>
         <TextInput
-        placeholder='Search'
+        value={input.value}
+        onChangeText={input.onChangeText}
+        placeholder='Search...'
         style={styles.searchButton}
         />
       </View>
@@ -122,7 +163,11 @@ const ListScreen =({navigation, route})=>{
           data={data}
           renderItem={({item})=>(
             <Item
+              id={item.id}
               title={item.title}
+              onSelect={handlerSelectItem}
+              onDelete={()=>handlerDelete(item.id)}
+
             />
           )}
           keyExtractor={(item)=>item.id.toString()}
