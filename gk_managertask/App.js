@@ -1,4 +1,5 @@
 import { Text, SafeAreaView, StyleSheet, View, TextInput, Image,TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {useState} from 'react'
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
@@ -32,21 +33,80 @@ const HomeScreen=({navigation})=>{
   );
 }
 const ListScreen =({navigation, route})=>{
-  return <Text>{route.params.userName}</Text>
+  const userName = route.params?.userName || 'Guest'; 
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const refreshData = async ()=> {
+    setLoading(true);
+    try{
+      const response = await fetch('https://6454008bc18adbbdfead590d.mockapi.io/api/v1/api_todolist');
+      if (!response.ok){
+        throw new Error('Khong lay duoc du lieu');
+      }
+      const jsonData= await response.json();
+      setData(jsonData);
+    } catch(error){
+        setError(error.message);
+    } finally{
+      setLoading(false);
+    }
+  }
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerPage2}>
+        <TouchableOpacity onPress={
+          ()=> navigation.goBack()
+        }> 
+          <Icon 
+          name="arrow-left"
+          size={20}
+          color="#000"
+          style={styles.iconBack}/>
+        </TouchableOpacity>
+        <View style={styles.infoUser}>
+        <Image source={require('./Avatar31.png')}/>
+        <View style={styles.headerTextWrap}>
+          <Text style={styles.helloText}>Hi {userName}</Text>
+          <Text style={styles.helloText2} >Have agrate day a head</Text>
+        </View>
+        </View>
+      </View>
+
+      <View style={styles.searchButtonWrap}>
+        <TextInput
+        placeholder='Search'
+        style={styles.searchButton}
+        />
+      </View>
+
+      <View style={styles.listItem}>
+        <Text>
+        List
+        </Text>
+      </View>
+      <TouchableOpacity style={styles.addButton}>
+        <Text style={styles.addButtonText}>
+          +
+        </Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  )
 }
 export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{headerShown:false}}
-        />
+       
         <Stack.Screen
           name="List"
           component={ListScreen}
-          // options={{headerShown:false}}
+          options={{headerShown:false}}
+        />
+         <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{headerShown:false}}
         />
       </Stack.Navigator>
     </NavigationContainer>
@@ -105,6 +165,63 @@ const styles = StyleSheet.create({
   },
   buttonText:{
     color:'white',
+  },
+  headerPage2:{
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    paddingRight:20
+  },
+  infoUser: {
+    flex:1,
+    flexDirection:'row',
+    justifyContent:'flex-end',
+    alignItems:'center',
+    paddingRight:20
+  },
+  iconBack:{
+    paddingLeft:20,
+  },
+  headerTextWrap:{
+    marginLeft:20,
+  },
+  helloText:{
+    fontSize:20,
+    fontWeight:'bold'
+  },
+  searchButtonWrap:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  searchButton:{
+    borderWidth:1,
+    height:30,
+    width:'80%',
+    borderRadius:5,
+    paddingLeft:20
+  },
+  listItem:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center',
+    height:'100%',
+    backgroundColor:'red'
+  },
+  addButton:{
+    left:'45%',
+    justifyContent:'center',
+    alignItems:'center',
+    backgroundColor:'#00BFFF',
+    height:50,
+    width:50,
+    borderRadius:30,
+    paddingVertical:20
+  },
+  addButtonText:{
+    color:'white',
+    fontSize:30
   }
   
 });
